@@ -118,21 +118,27 @@
       function isFunction(value) {
         return type(value) == "function"
       }
+      // True if the object is a window object. 
+      // This is useful for iframes where each one has its own window, 
+      // and where these objects fail the regular obj === window check.      
       // 判断是否是 window对象（注意，w为小写）指当前的浏览器窗口，window对象的window属性指向自身。
       // 即 window.window === window
+      // 主要是用来判断 iframe 的
+      // 每一个 iframe 都有自己的 window，所以他们之间的 window 是不相等的
       function isWindow(obj) {
         return obj != null && obj == obj.window
       }
       // 判断是否是 document 对象
       // window.document.nodeType == 9 数字表示为9，常量表示为 DOCUMENT_NODE 
       function isDocument(obj) {
-          return obj != null && obj.nodeType == obj.DOCUMENT_NODE
+        return obj != null && obj.nodeType == obj.DOCUMENT_NODE
       }
       // 判断是否是 object
       function isObject(obj) {
         return type(obj) == "object"
       }
-      // 判断是否是最基本的 object：Object.getPrototypeOf(obj) == Object.prototype
+      // 判断是否是最基本的 object，不是 new 出来的那种
+      // Object.getPrototypeOf(obj) == Object.prototype
       // Object.getPrototypeOf() 方法返回指定对象的原型（即, 内部[[Prototype]]属性的值）
       // getPrototypeOf 和 prototype 的区别：
       // getPrototypeOf是个function，而 prototype 是个属性
@@ -143,53 +149,58 @@
       // var t = {c:"heihei"};
       // Object.getPrototypeOf(t) === Object.prototype // true
       function isPlainObject(obj) {
-          return isObject(obj) && !isWindow(obj) && Object.getPrototypeOf(obj) == Object.prototype
+        return isObject(obj) && !isWindow(obj) && Object.getPrototypeOf(obj) == Object.prototype
       }
       // 判断是否是类数组
       function likeArray(obj) {
         var length = !!obj && 'length' in obj && obj.length,
             type = $.type(obj)
-
-            return 'function' != type && !isWindow(obj) && ('array' == type || length === 0 || (typeof length == 'number' && length > 0 && (length - 1) in obj))
+        // 函数身上也有 length 这个属性，用来表示接受介个形参
+        return 'function' != type && !isWindow(obj) && ('array' == type || length === 0 || (typeof length == 'number' && length > 0 && (length - 1) in obj))
       }
-      // 筛选数组，踢出 null undefined 元素
-      // '' 这个是不会被踢出的
+      // 筛选数组，剔除 null undefined 元素
+      // '' 这个是不会被剔除的
       function compact(array) {
-          return filter.call(array, function(item) {
-              return item != null
-          })
+        return filter.call(array, function(item) {
+          return item != null
+        })
       }
-
+      // 数组降维度
       function flatten(array) {
-          return array.length > 0 ? $.fn.concat.apply([], array) : array
+        return array.length > 0 ? $.fn.concat.apply([], array) : array
       }
       // 用于 css 的 camalCase 转换，例如 background-color 转换为 backgroundColor
       camelize = function(str) {
-          return str.replace(/-+(.)?/g, function(match, chr) {
-              return chr ? chr.toUpperCase() : ''
-          })
+        return str.replace(/-+(.)?/g, function(match, chr) {
+          return chr ? chr.toUpperCase() : ''
+        })
       }
-
+      // ?????
       function dasherize(str) {
-          return str.replace(/::/g, '/')
-              .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-              .replace(/([a-z\d])([A-Z])/g, '$1_$2')
-              .replace(/_/g, '-')
-              .toLowerCase()
+        return str.replace(/::/g, '/')
+                  .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+                  .replace(/([a-z\d])([A-Z])/g, '$1_$2')
+                  .replace(/_/g, '-')
+                  .toLowerCase()
       }
       // 数组去重  eg:[1,1,2,3,3] 替换为 [1,2,3]
       uniq = function(array) {
-          return filter.call(array, function(item, idx) {
-              return array.indexOf(item) == idx
-          })
+        return filter.call(array, function(item, idx) {
+          return array.indexOf(item) == idx
+        })
       }
-
+      // classCache 存储的数据是这样的：
+      // {
+      //   abc: /(^|\s)abc(\s|$)/,  // 能匹配 'abc' 或 ' abc ' 或 ' abc' 或 'abc '
+      //   xyz: /(^|\s)abc(\s|$)/,
+      //   ...
+      // }
       function classRE(name) {
-          return name in classCache ? classCache[name] : (classCache[name] = new RegExp('(^|\\s)' + name + '(\\s|$)'))
+        return name in classCache ? classCache[name] : (classCache[name] = new RegExp('(^|\\s)' + name + '(\\s|$)'))
       }
-
+      // 传入一个 css 的 name 和 value，判断这个 value 是否需要增加 'px'
       function maybeAddPx(name, value) {
-          return (typeof value == "number" && !cssNumber[dasherize(name)]) ? value + "px" : value
+        return (typeof value == "number" && !cssNumber[dasherize(name)]) ? value + "px" : value
       }
 
       function defaultDisplay(nodeName) {
@@ -204,18 +215,21 @@
           }
           return elementDisplay[nodeName]
       }
-
+      //返回一个元素的子元素，数组形式
       function children(element) {
+          // 有些浏览器支持 elem.children 获取子元素，有些不支持
           return 'children' in element ? slice.call(element.children) : $.map(element.childNodes, function(node) {
-              if (node.nodeType == 1) return node
+            if (node.nodeType == 1) return node
           })
       }
-
+      // 构造函数 ，在 zepto.Z 中被使用
       function Z(dom, selector) {
-          var i, len = dom ? dom.length : 0
-          for (i = 0; i < len; i++) this[i] = dom[i]
-          this.length = len
-          this.selector = selector || ''
+        var i, len = dom ? dom.length : 0
+        for (i = 0; i < len; i++) {
+          this[i] = dom[i]
+        }
+        this.length = len
+        this.selector = selector || ''
       }
 
       // `$.zepto.fragment` takes a html string and an optional tag name
