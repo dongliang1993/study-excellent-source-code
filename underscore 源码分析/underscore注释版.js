@@ -2631,6 +2631,7 @@
   // 其实并不是时间戳，时间戳还要除以 1000（单位 s）
   // +new Date 类似
   _.now = Date.now || function() {
+    // 如果有Date.now存在，就用那个，不存在只能自己写了
     return new Date().getTime();
   };
 
