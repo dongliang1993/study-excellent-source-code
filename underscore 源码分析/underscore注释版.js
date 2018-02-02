@@ -481,7 +481,7 @@
   // 即该 obj 中是否有指定的 value 值
   // 返回布尔值
   _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
-    // 如果是对象，返回 values 组成的数组
+    // 如果不是一个类数组（是对象），返回 values 组成的数组
     if (!isArrayLike(obj)) obj = _.values(obj);
 
     // fromIndex 表示查询起始位置
@@ -1896,6 +1896,7 @@
 
     // Ahem, IE < 9.
     // IE < 9 下不能用 for in 来枚举某些 key 值
+    // 对象原型里toString是不可枚举的。但是{toString : 1}这里的toString应该可以枚举的。ie6-8对此却认为也是不可枚举的
     // 传入 keys 数组为参数
     // 因为 JavaScript 下函数参数按值传递
     // 所以 keys 当做参数传入后会在 `collectNonEnumProps` 方法中改变值

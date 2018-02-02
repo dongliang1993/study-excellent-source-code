@@ -139,22 +139,6 @@
   // Math.pow(2, 53) - 1 是 JavaScript 中能精确表示的最大数字
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
 
-  // getLength 函数
-  // 该函数传入一个参数，返回参数的 length 属性值
-  // 用来获取 array 以及 arrayLike 元素的 length 属性值
-  var getLength = property('length');
-
-  // 判断是否是 ArrayLike Object
-  // 类数组，即拥有 length 属性并且 length 属性值为 Number 类型的元素
-  // 包括数组、arguments、HTML Collection 以及 NodeList 等等
-  // 包括类似 {length: 10} 这样的对象
-  // 包括字符串、函数等
-  var isArrayLike = function(collection) {
-    // 返回参数 collection 的 length 属性值
-    var length = getLength(collection);
-    return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
-  };
-
 
   // Collection Functions
   // 数组或者对象的扩展方法
@@ -376,24 +360,6 @@
     return false;
   };
 
-  // Determine if the array or object contains a given item (using `===`).
-  // Aliased as `includes` and `include`.
-  // 判断数组或者对象中（value 值）是否有指定元素
-  // 如果是 object，则忽略 key 值，只需要查找 value 值即可
-  // 即该 obj 中是否有指定的 value 值
-  // 返回布尔值
-  _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
-    // 如果是对象，返回 values 组成的数组
-    if (!isArrayLike(obj)) obj = _.values(obj);
-
-    // fromIndex 表示查询起始位置
-    // 如果没有指定该参数，则默认从头找起
-    if (typeof fromIndex != 'number' || guard) fromIndex = 0;
-
-    // _.indexOf 是数组的扩展方法（Array Functions）
-    // 数组中寻找某一元素
-    return _.indexOf(obj, item, fromIndex) >= 0;
-  };
 
   // Invoke a method (with arguments) on every item in a collection.
   // Calls the method named by methodName on each value in the list.
@@ -1772,78 +1738,6 @@
     }
   }
 
-  // Retrieve the names of an object's own properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`
-  // ===== //
-  // _.keys({one: 1, two: 2, three: 3});
-  // => ["one", "two", "three"]
-  // ===== //
-  // 返回一个对象的 keys 组成的数组
-  // 仅返回 own enumerable properties 组成的数组
-  _.keys = function(obj) {
-    // 容错
-    // 如果传入的参数不是对象，则返回空数组
-    if (!_.isObject(obj)) return [];
-
-    // 如果浏览器支持 ES5 Object.key() 方法
-    // 则优先使用该方法
-    if (nativeKeys) return nativeKeys(obj);
-
-    var keys = [];
-
-    // own enumerable properties
-    for (var key in obj)
-      // hasOwnProperty
-      if (_.has(obj, key)) keys.push(key);
-
-    // Ahem, IE < 9.
-    // IE < 9 下不能用 for in 来枚举某些 key 值
-    // 传入 keys 数组为参数
-    // 因为 JavaScript 下函数参数按值传递
-    // 所以 keys 当做参数传入后会在 `collectNonEnumProps` 方法中改变值
-    if (hasEnumBug) collectNonEnumProps(obj, keys);
-
-    return keys;
-  };
-
-  // Retrieve all the property names of an object.
-  // 返回一个对象的 keys 数组
-  // 不仅仅是 own enumerable properties
-  // 还包括原型链上继承的属性
-  _.allKeys = function(obj) {
-    // 容错
-    // 不是对象，则返回空数组
-    if (!_.isObject(obj)) return [];
-
-    var keys = [];
-    for (var key in obj) keys.push(key);
-
-    // Ahem, IE < 9.
-    // IE < 9 下的 bug，同 _.keys 方法
-    if (hasEnumBug) collectNonEnumProps(obj, keys);
-
-    return keys;
-  };
-
-  // Retrieve the values of an object's properties.
-  // ===== //
-  // _.values({one: 1, two: 2, three: 3});
-  // => [1, 2, 3]
-  // ===== //
-  // 将一个对象的所有 values 值放入数组中
-  // 仅限 own properties 上的 values
-  // 不包括原型链上的
-  // 并返回该数组
-  _.values = function(obj) {
-    // 仅包括 own properties
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var values = Array(length);
-    for (var i = 0; i < length; i++) {
-      values[i] = obj[keys[i]];
-    }
-    return values;
-  };
 
   // Returns the results of applying the iteratee to each element of the object
   // In contrast to _.map it returns an object
