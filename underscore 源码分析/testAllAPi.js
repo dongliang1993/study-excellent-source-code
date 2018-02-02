@@ -1685,58 +1685,6 @@
   // 共 38 个扩展方法
   // ----------------
 
-  // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
-  // IE < 9 下 不能用 for key in ... 来枚举对象的某些 key
-  // 比如重写了对象的 `toString` 方法，这个 key 值就不能在 IE < 9 下用 for in 枚举到
-  // IE < 9，{toString: null}.propertyIsEnumerable('toString') 返回 false
-  // IE < 9，重写的 `toString` 属性被认为不可枚举
-  // 据此可以判断是否在 IE < 9 浏览器环境中
-  var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
-
-  // IE < 9 下不能用 for in 来枚举的 key 值集合
-  // 其实还有个 `constructor` 属性
-  // 个人觉得可能是 `constructor` 和其他属性不属于一类
-  // nonEnumerableProps[] 中都是方法
-  // 而 constructor 表示的是对象的构造函数
-  // 所以区分开来了
-  var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
-                      'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
-
-  // obj 为需要遍历键值对的对象
-  // keys 为键数组
-  // 利用 JavaScript 按值传递的特点
-  // 传入数组作为参数，能直接改变数组的值
-  function collectNonEnumProps(obj, keys) {
-    var nonEnumIdx = nonEnumerableProps.length;
-    var constructor = obj.constructor;
-
-    // 获取对象的原型
-    // 如果 obj 的 constructor 被重写
-    // 则 proto 变量为 Object.prototype
-    // 如果没有被重写
-    // 则为 obj.constructor.prototype
-    var proto = (_.isFunction(constructor) && constructor.prototype) || ObjProto;
-
-    // Constructor is a special case.
-    // `constructor` 属性需要特殊处理 (是否有必要？)
-    // see https://github.com/hanzichi/underscore-analysis/issues/3
-    // 如果 obj 有 `constructor` 这个 key
-    // 并且该 key 没有在 keys 数组中
-    // 存入 keys 数组
-    var prop = 'constructor';
-    if (_.has(obj, prop) && !_.contains(keys, prop)) keys.push(prop);
-
-    // 遍历 nonEnumerableProps 数组中的 keys
-    while (nonEnumIdx--) {
-      prop = nonEnumerableProps[nonEnumIdx];
-      // prop in obj 应该肯定返回 true 吧？是否有判断必要？
-      // obj[prop] !== proto[prop] 判断该 key 是否来自于原型链
-      // 即是否重写了原型链上的属性
-      if (prop in obj && obj[prop] !== proto[prop] && !_.contains(keys, prop)) {
-        keys.push(prop);
-      }
-    }
-  }
 
 
   // Returns the results of applying the iteratee to each element of the object
@@ -1765,59 +1713,7 @@
     return results;
   };
 
-  // Convert an object into a list of `[key, value]` pairs.
-  // 将一个对象转换为元素为 [key, value] 形式的数组
-  // _.pairs({one: 1, two: 2, three: 3});
-  // => [["one", 1], ["two", 2], ["three", 3]]
-  _.pairs = function(obj) {
-    var keys = _.keys(obj);
-    var length = keys.length;
-    var pairs = Array(length);
-    for (var i = 0; i < length; i++) {
-      pairs[i] = [keys[i], obj[keys[i]]];
-    }
-    return pairs;
-  };
 
-  // Invert the keys and values of an object. The values must be serializable.
-  // 将一个对象的 key-value 键值对颠倒
-  // 即原来的 key 为 value 值，原来的 value 值为 key 值
-  // 需要注意的是，value 值不能重复（不然后面的会覆盖前面的）
-  // 且新构造的对象符合对象构造规则
-  // 并且返回新构造的对象
-  _.invert = function(obj) {
-    // 返回的新的对象
-    var result = {};
-    var keys = _.keys(obj);
-    for (var i = 0, length = keys.length; i < length; i++) {
-      result[obj[keys[i]]] = keys[i];
-    }
-    return result;
-  };
-
-  // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`
-  // 传入一个对象
-  // 遍历该对象的键值对（包括 own properties 以及 原型链上的）
-  // 如果某个 value 的类型是方法（function），则将该 key 存入数组
-  // 将该数组排序后返回
-  _.functions = _.methods = function(obj) {
-    // 返回的数组
-    var names = [];
-
-    // if IE < 9
-    // 且对象重写了 `nonEnumerableProps` 数组中的某些方法
-    // 那么这些方法名是不会被返回的
-    // 可见放弃了 IE < 9 可能对 `toString` 等方法的重写支持
-    for (var key in obj) {
-      // 如果某个 key 对应的 value 值类型是函数
-      // 则将这个 key 值存入数组
-      if (_.isFunction(obj[key])) names.push(key);
-    }
-
-    // 返回排序后的数组
-    return names.sort();
-  };
 
   // Extend a given object with all the properties in passed-in object(s).
   // extend_.extend(destination, *sources)
@@ -1963,51 +1859,7 @@
     return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
   };
 
-  // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
-  // _.chain([1,2,3,200])
-  // .filter(function(num) { return num % 2 == 0; })
-  // .tap(alert)
-  // .map(function(num) { return num * num })
-  // .value();
-  // => // [2, 200] (alerted)
-  // => [4, 40000]
-  // 主要是用在链式调用中
-  // 对中间值立即进行处理
-  _.tap = function(obj, interceptor) {
-    interceptor(obj);
-    return obj;
-  };
 
-  // Returns whether an object has a given set of `key:value` pairs.
-  // attrs 参数为一个对象
-  // 判断 object 对象中是否有 attrs 中的所有 key-value 键值对
-  // 返回布尔值
-  _.isMatch = function(object, attrs) {
-    // 提取 attrs 对象的所有 keys
-    var keys = _.keys(attrs), length = keys.length;
-
-    // 如果 object 为空
-    // 根据 attrs 的键值对数量返回布尔值
-    if (object == null) return !length;
-
-    // 这一步有必要？
-    var obj = Object(object);
-
-    // 遍历 attrs 对象键值对
-    for (var i = 0; i < length; i++) {
-      var key = keys[i];
-
-      // 如果 obj 对象没有 attrs 对象的某个 key
-      // 或者对于某个 key，它们的 value 值不同
-      // 则证明 object 并不拥有 attrs 的所有键值对
-      // 则返回 false
-      if (attrs[key] !== obj[key] || !(key in obj)) return false;
-    }
-
-    return true;
-  };
 
 
   // Internal recursive comparison function for `isEqual`.
@@ -2212,21 +2064,6 @@
     return eq(a, b);
   };
 
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
-  // 是否是 {}、[] 或者 "" 或者 null、undefined
-  _.isEmpty = function(obj) {
-    if (obj == null) return true;
-
-    // 如果是数组、类数组、或者字符串
-    // 根据 length 属性判断是否为空
-    // 后面的条件是为了过滤 isArrayLike 对于 {length: 10} 这样对象的判断 bug？
-    if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length === 0;
-
-    // 如果是对象
-    // 根据 keys 数量判断是否为 Empty
-    return _.keys(obj).length === 0;
-  };
 
   // Utility Functions
   // 工具类方法
