@@ -2550,7 +2550,9 @@
   // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
   // previous owner. Returns a reference to the Underscore object.
   // 如果全局环境中已经使用了 `_` 变量
-  // 可以用该方法返回其他变量
+  // 可以用该方法不改变之前的_,把缓存的previousUnderscore
+  // 接着挂回去
+  // 然后返回自己局部的 _ 
   // 继续使用 underscore 中的方法
   // var underscore = _.noConflict();
   // underscore.each(..);

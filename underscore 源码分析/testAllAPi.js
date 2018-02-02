@@ -2449,18 +2449,6 @@
   // 共 14 个扩展方法
   // -----------------
 
-  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-  // previous owner. Returns a reference to the Underscore object.
-  // 如果全局环境中已经使用了 `_` 变量
-  // 可以用该方法返回其他变量
-  // 继续使用 underscore 中的方法
-  // var underscore = _.noConflict();
-  // underscore.each(..);
-  _.noConflict = function() {
-    root._ = previousUnderscore;
-    return this;
-  };
-
   // Keep the identity function around for default iteratees.
   // 返回传入的参数，看起来好像没什么卵用
   // 其实 _.identity 在 undescore 内大量作为迭代函数出现
