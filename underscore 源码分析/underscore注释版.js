@@ -2570,6 +2570,7 @@
   };
 
   // Predicate-generating functions. Often useful outside of Underscore.
+  // 返回一个能返回参数本身的函数。
   _.constant = function(value) {
     return function() {
       return value;
