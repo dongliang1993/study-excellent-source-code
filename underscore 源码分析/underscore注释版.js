@@ -2616,6 +2616,9 @@
   // Return a random integer between min and max (inclusive).
   // 返回一个 [min, max] 范围内的任意整数
   _.random = function(min, max) {
+    // 如果只传一个参数，是返回0和其之间的随机数的
+    // 没有判断、限制 min 必须小于 max 
+    // 这个api是有问题的
     if (max == null) {
       max = min;
       min = 0;
