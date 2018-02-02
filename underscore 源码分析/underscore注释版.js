@@ -2444,6 +2444,8 @@
   // Is a given value an array?
   // Delegates to ECMA5's native Array.isArray
   // 判断是否为数组
+  // http://www.cnblogs.com/ziyunfei/archive/2012/11/05/2754156.html
+  // https://github.com/lifesinger/blog/issues/175
   _.isArray = nativeIsArray || function(obj) {
     return toString.call(obj) === '[object Array]';
   };
@@ -2453,6 +2455,12 @@
   // 这里的对象包括 function 和 object
   _.isObject = function(obj) {
     var type = typeof obj;
+    // 麻烦的地方是return语句。
+    // &&的优先级比||的要高，所以等价于
+    // return type === 'function' || (type === 'object' && !!obj);
+    // 如果是函数类型，直接返回。
+    // 如果不是，首先是typeof是object的。
+    // 后面的!!obj是拿到obj的布尔值。目的是为了排除nul
     return type === 'function' || type === 'object' && !!obj;
   };
 
@@ -2467,6 +2475,7 @@
   // Define a fallback version of the method in browsers (ahem, IE < 9), where
   // there isn't any inspectable "Arguments" type.
   // _.isArguments 方法在 IE < 9 下的兼容
+  // 有的浏览器没有Arguments这种类型
   // IE < 9 下对 arguments 调用 Object.prototype.toString.call 方法
   // 结果是 => [object Object]
   // 而并非我们期望的 [object Arguments]。
@@ -2491,6 +2500,7 @@
 
   // Is a given object a finite number?
   // 判断是否是有限的数字
+  // 应该是对浏览器做了兼容。具体是什么浏览器，不清楚。
   _.isFinite = function(obj) {
     return isFinite(obj) && !isNaN(parseFloat(obj));
   };
@@ -2503,6 +2513,8 @@
   // 详见 https://github.com/hanzichi/underscore-analysis/issues/13
   // 最新版本（edge 版）已经修复该 BUG
   _.isNaN = function(obj) {
+    // 先看看是不是数字类型。
+    // 如果是，进一步判断是否不等于自身。如果是就NaN。
     return _.isNumber(obj) && obj !== +obj;
   };
 
@@ -2512,6 +2524,7 @@
   // 以及 new Boolean() 两个方向判断
   // 有点多余了吧？
   // 个人觉得直接用 toString.call(obj) 来判断就可以了
+  // 也许对一些浏览器做兼容吧
   _.isBoolean = function(obj) {
     return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   };
