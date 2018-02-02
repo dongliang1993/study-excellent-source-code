@@ -2515,24 +2515,6 @@
     return accum;
   };
 
-  // Return a random integer between min and max (inclusive).
-  // 返回一个 [min, max] 范围内的任意整数
-  _.random = function(min, max) {
-    if (max == null) {
-      max = min;
-      min = 0;
-    }
-    return min + Math.floor(Math.random() * (max - min + 1));
-  };
-
-  // A (possibly faster) way to get the current timestamp as an integer.
-  // 返回当前时间的 "时间戳"（单位 ms）
-  // 其实并不是时间戳，时间戳还要除以 1000（单位 s）
-  // +new Date 类似
-  _.now = Date.now || function() {
-    return new Date().getTime();
-  };
-
   // List of HTML entities for escaping.
   // HTML 实体编码
   // escapeMap 用于编码
@@ -2594,15 +2576,6 @@
       value = fallback;
     }
     return _.isFunction(value) ? value.call(object) : value;
-  };
-
-  // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
-  // 生成客户端临时的 DOM ids
-  var idCounter = 0;
-  _.uniqueId = function(prefix) {
-    var id = ++idCounter + '';
-    return prefix ? prefix + id : id;
   };
 
   // By default, Underscore uses ERB-style template delimiters, change the

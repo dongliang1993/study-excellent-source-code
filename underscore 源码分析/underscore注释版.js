@@ -2700,6 +2700,7 @@
 
   // Generate a unique integer id (unique within the entire client session).
   // Useful for temporary DOM ids.
+  // 生成一个独一无二的整数 id（最后id其实是个字符串）
   // 生成客户端临时的 DOM ids
   var idCounter = 0;
   _.uniqueId = function(prefix) {
