@@ -2418,21 +2418,6 @@
     return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   };
 
-  // Is a given value equal to null?
-  // 判断是否是 null
-  _.isNull = function(obj) {
-    return obj === null;
-  };
-
-  // Is a given variable undefined?
-  // 判断是否是 undefined
-  // undefined 能被改写 （IE < 9）
-  // undefined 只是全局对象的一个属性
-  // 在局部环境能被重新定义
-  // 但是「void 0」始终是 undefined
-  _.isUndefined = function(obj) {
-    return obj === void 0;
-  };
 
   // Shortcut function for checking if an object has a given property directly
   // on itself (in other words, not on a prototype).

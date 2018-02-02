@@ -2519,6 +2519,8 @@
   // Is a given value equal to null?
   // 判断是否是 null
   _.isNull = function(obj) {
+    // 注意源码中是三等号。
+    // 所以如果obj是undefined，返回的是false；
     return obj === null;
   };
 
