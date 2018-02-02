@@ -59,55 +59,6 @@
     return cb(value, context, Infinity);
   };
 
-  // An internal function for creating assigner functions.
-  // 有三个方法用到了这个内部函数
-  // _.extend & _.extendOwn & _.defaults
-  // _.extend = createAssigner(_.allKeys);
-  // _.extendOwn = _.assign = createAssigner(_.keys);
-  // _.defaults = createAssigner(_.allKeys, true);
-  var createAssigner = function(keysFunc, undefinedOnly) {
-    // 返回函数
-    // 经典闭包（undefinedOnly 参数在返回的函数中被引用）
-    // 返回的函数参数个数 >= 1
-    // 将第二个开始的对象参数的键值对 "继承" 给第一个参数
-    return function(obj) {
-      var length = arguments.length;
-      // 只传入了一个参数（或者 0 个？）
-      // 或者传入的第一个参数是 null
-      if (length < 2 || obj == null) return obj;
-
-      // 枚举第一个参数除外的对象参数
-      // 即 arguments[1], arguments[2] ...
-      for (var index = 1; index < length; index++) {
-        // source 即为对象参数
-        var source = arguments[index],
-            // 提取对象参数的 keys 值
-            // keysFunc 参数表示 _.keys
-            // 或者 _.allKeys
-            keys = keysFunc(source),
-            l = keys.length;
-        // 遍历该对象的键值对
-        for (var i = 0; i < l; i++) {
-          var key = keys[i];
-          // _.extend 和 _.extendOwn 方法
-          // 没有传入 undefinedOnly 参数，即 !undefinedOnly 为 true
-          // 即肯定会执行 obj[key] = source[key]
-          // 后面对象的键值对直接覆盖 obj
-          // ==========================================
-          // _.defaults 方法，undefinedOnly 参数为 true
-          // 即 !undefinedOnly 为 false
-          // 那么当且仅当 obj[key] 为 undefined 时才覆盖
-          // 即如果有相同的 key 值，取最早出现的 value 值
-          // *defaults 中有相同 key 的也是一样取首次出现的
-          if (!undefinedOnly || obj[key] === void 0)
-            obj[key] = source[key];
-        }
-      }
-
-      // 返回已经继承后面对象参数属性的第一个参数对象
-      return obj;
-    };
-  };
 
   // An internal function for creating a new object that inherits from another.
   // use in `_.create`
@@ -1715,23 +1666,6 @@
 
 
 
-  // Extend a given object with all the properties in passed-in object(s).
-  // extend_.extend(destination, *sources)
-  // Copy all of the properties in the source objects over to the destination object
-  // and return the destination object
-  // It's in-order, so the last source will override properties of the same name in previous arguments.
-  // 将几个对象上（第二个参数开始，根据参数而定）的所有键值对添加到 destination 对象（第一个参数）上
-  // 因为 key 值可能会相同，所以后面的（键值对）可能会覆盖前面的
-  // 参数个数 >= 1
-  _.extend = createAssigner(_.allKeys);
-
-  // Assigns a given object with all the own properties in the passed-in object(s)
-  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
-  // 跟 extend 方法类似，但是只把 own properties 拷贝给第一个参数对象
-  // 只继承 own properties 的键值对
-  // 参数个数 >= 1
-  _.extendOwn = _.assign = createAssigner(_.keys);
-
   // Returns the first key on an object that passes a predicate test
   // 跟数组方法的 _.findIndex 类似
   // 找到对象的键值对中第一个满足条件的键值对
@@ -1817,17 +1751,7 @@
     return _.pick(obj, iteratee, context);
   };
 
-  // _.defaults(object, *defaults)
-  // Fill in a given object with default properties.
-  // Fill in undefined properties in object
-  // with the first value present in the following list of defaults objects.
-  // 和 _.extend 非常类似
-  // 区别是如果 *defaults 中出现了和 object 中一样的键
-  // 则不覆盖 object 的键值对
-  // 如果 *defaults 多个参数对象中有相同 key 的对象
-  // 则取最早出现的 value 值
-  // 参数个数 >= 1
-  _.defaults = createAssigner(_.allKeys, true);
+
 
   // Creates an object that inherits from the given prototype object.
   // If additional properties are provided then they will be added to the
@@ -1843,21 +1767,6 @@
   //   return result;
   // };
 
-  // Create a (shallow-cloned) duplicate of an object.
-  // 对象的 `浅复制` 副本
-  // 注意点：所有嵌套的对象或者数组都会跟原对象用同一个引用
-  // 所以是为浅复制，而不是深度克隆
-  _.clone = function(obj) {
-    // 容错，如果不是对象或者数组类型，则可以直接返回
-    // 因为一些基础类型是直接按值传递的
-    // 思考，arguments 呢？ Nodelists 呢？ HTML Collections 呢？
-    if (!_.isObject(obj))
-      return obj;
-
-    // 如果是数组，则用 obj.slice() 返回数组副本
-    // 如果是对象，则提取所有 obj 的键值对覆盖空对象，返回
-    return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
-  };
 
 
 
