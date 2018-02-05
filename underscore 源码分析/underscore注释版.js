@@ -106,6 +106,7 @@
   // 根据 this 指向（context 参数）
   // 以及 argCount 参数
   // 二次操作返回一些回调、迭代方法
+  // 其实他就做了一个事情。绑定作用域。
   var optimizeCb = function(func, context, argCount) {
     // 如果没有指定 this 指向，则返回原函数
     if (context === void 0)
@@ -1169,7 +1170,11 @@
   // Converts lists into objects. Pass either a single array of `[key, value]`
   // pairs, or two parallel arrays of the same length -- one of keys, and one of
   // the corresponding values.
-  // 将数组转化为对象
+  // 将数组转化为对
+  // _.object(['moe', 'larry', 'curly'], [30, 40, 50]);
+  // => {moe: 30, larry: 40, curly: 50}
+  // _.object([['moe', 30], ['larry', 40], ['curly', 50]]);
+  // => {moe: 30, larry: 40, curly: 50}
   _.object = function(list, values) {
     var result = {};
     for (var i = 0, length = getLength(list); i < length; i++) {
@@ -2219,6 +2224,7 @@
   // "内部的"/ "递归地"/ "比较"
   // 该内部方法会被递归调用
   var eq = function(a, b, aStack, bStack) {
+    debugger
     // Identical objects are equal. `0 === -0`, but they aren't identical.
     // See the [Harmony `egal` proposal](http://wiki.ecmascript.org/doku.php?id=harmony:egal).
     // a === b 时
