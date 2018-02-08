@@ -177,22 +177,6 @@
     });
   };
 
-  // Convenience version of a common use case of `map`: fetching a property.
-  // 一个数组，元素都是对象
-  // 根据指定的 key 值
-  // 返回一个数组，元素都是指定 key 值的 value 值
-  /*
-  var property = function(key) {
-    return function(obj) {
-      return obj == null ? void 0 : obj[key];
-    };
-  };
-  */
-  // _.pluck(list, propertyName)
-  _.pluck = function(obj, key) {
-    return _.map(obj, _.property(key));
-  };
-
   // Convenience version of a common use case of `filter`: selecting only objects
   // containing specific `key:value` pairs.
   // 根据指定的键值对
@@ -206,34 +190,6 @@
   // 寻找第一个有指定 key-value 键值对的对象
   _.findWhere = function(obj, attrs) {
     return _.find(obj, _.matcher(attrs));
-  };
-
-  // Return the minimum element (or element-based computation).
-  // 寻找最小的元素
-  // 类似 _.max
-  // _.min(list, [iteratee], [context])
-  _.min = function(obj, iteratee, context) {
-    var result = Infinity, lastComputed = Infinity,
-        value, computed;
-    if (iteratee == null && obj != null) {
-      obj = isArrayLike(obj) ? obj : _.values(obj);
-      for (var i = 0, length = obj.length; i < length; i++) {
-        value = obj[i];
-        if (value < result) {
-          result = value;
-        }
-      }
-    } else {
-      iteratee = cb(iteratee, context);
-      _.each(obj, function(value, index, list) {
-        computed = iteratee(value, index, list);
-        if (computed < lastComputed || computed === Infinity && result === Infinity) {
-          result = value;
-          lastComputed = computed;
-        }
-      });
-    }
-    return result;
   };
 
   // Shuffle a collection, using the modern version of the
@@ -429,26 +385,6 @@
   // Note: All array functions will also work on the arguments object.
   // However, Underscore functions are not designed to work on "sparse" arrays.
   // ---------------
-
-  // Complement of _.zip. Unzip accepts an array of arrays and groups
-  // each array's elements on shared indices
-  // The opposite of zip. Given an array of arrays,
-  // returns a series of new arrays,
-  // the first of which contains all of the first elements in the input arrays,
-  // the second of which contains all of the second elements, and so on.
-  // ===== //
-  // _.unzip([["moe", 30, true], ["larry", 40, false], ["curly", 50, false]]);
-  // => [['moe', 'larry', 'curly'], [30, 40, 50], [true, false, false]]
-  // ===== //
-  _.unzip = function(array) {
-    var length = array && _.max(array, getLength).length || 0;
-    var result = Array(length);
-
-    for (var index = 0; index < length; index++) {
-      result[index] = _.pluck(array, index);
-    }
-    return result;
-  };
 
 
   // Generator function to create the findIndex and findLastIndex functions
