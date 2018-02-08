@@ -560,7 +560,6 @@
     var result = -Infinity, lastComputed = -Infinity,
         value, computed;
 
-    // 单纯地寻找最值
     if (iteratee == null && obj != null) {
       // 如果是数组，则寻找数组中最大元素
       // 如果是对象，则寻找最大 value 值
@@ -587,6 +586,11 @@
         computed = iteratee(value, index, list);
         // && 的优先级高于 ||
         if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
+          // computed === -Infinity&&result === -Infinity这句话的目的是为了保证，
+          // 如果真没有比-Infinity的，也要正确返回元素。比如下面的例子。
+          // var a = [{age: -Infinity}];
+          // _.max(a, function(obj){ return obj.age; });
+          // => {{age: -Infinity}};
           result = value;
           lastComputed = computed;
         }

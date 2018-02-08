@@ -208,51 +208,6 @@
     return _.find(obj, _.matcher(attrs));
   };
 
-  // Return the maximum element (or element-based computation).
-  // 寻找数组中的最大元素
-  // 或者对象中的最大 value 值
-  // 如果有 iteratee 参数，则求每个元素经过该函数迭代后的最值
-  // _.max(list, [iteratee], [context])
-  _.max = function(obj, iteratee, context) {
-    var result = -Infinity, lastComputed = -Infinity,
-        value, computed;
-
-    // 单纯地寻找最值
-    if (iteratee == null && obj != null) {
-      // 如果是数组，则寻找数组中最大元素
-      // 如果是对象，则寻找最大 value 值
-      obj = isArrayLike(obj) ? obj : _.values(obj);
-
-      for (var i = 0, length = obj.length; i < length; i++) {
-        value = obj[i];           
-        if (value > result) {
-          result = value;
-        }
-
-        // if(obj[i] > result) {
-        //   result = obj[i];         ???? 为什么要多设一个value参数？
-        // }
-      }
-    } else {  // 寻找元素经过迭代后的最值
-      iteratee = cb(iteratee, context);
-
-      // result 保存结果元素
-      // lastComputed 保存计算过程中出现的最值
-      // 遍历元素
-      _.each(obj, function(value, index, list) {
-        // 经过迭代函数后的值
-        computed = iteratee(value, index, list);
-        // && 的优先级高于 ||
-        if (computed > lastComputed || computed === -Infinity && result === -Infinity) {
-          result = value;
-          lastComputed = computed;
-        }
-      });
-    }
-
-    return result;
-  };
-
   // Return the minimum element (or element-based computation).
   // 寻找最小的元素
   // 类似 _.max
@@ -474,19 +429,6 @@
   // Note: All array functions will also work on the arguments object.
   // However, Underscore functions are not designed to work on "sparse" arrays.
   // ---------------
-
-
-  // Zip together multiple lists into a single array -- elements that share
-  // an index go together.
-  // ===== //
-  // _.zip(['moe', 'larry', 'curly'], [30, 40, 50], [true, false, false]);
-  // => [["moe", 30, true], ["larry", 40, false], ["curly", 50, false]]
-  // ===== //
-  // 将多个数组中相同位置的元素归类
-  // 返回一个数组
-  _.zip = function() {
-    return _.unzip(arguments);
-  };
 
   // Complement of _.zip. Unzip accepts an array of arrays and groups
   // each array's elements on shared indices
