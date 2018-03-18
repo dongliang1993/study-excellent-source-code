@@ -224,6 +224,7 @@
       }
       // 构造函数 ，在 zepto.Z 中被使用
       function Z(dom, selector) {
+          debugger
         var i, len = dom ? dom.length : 0
         for (i = 0; i < len; i++) {
           this[i] = dom[i]
