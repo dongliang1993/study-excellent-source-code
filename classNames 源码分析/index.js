@@ -40,6 +40,7 @@
 			if (argType === 'string' || argType === 'number') {
 				classes.push(arg);
 			} else if (Array.isArray(arg) && arg.length) {
+        // 递归展开
         // inner 是字符串
 				var inner = classNames.apply(null, arg);
 				if (inner) {
