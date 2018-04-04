@@ -245,6 +245,7 @@
 
   // 判断是否是 ArrayLike Object
   // 类数组，即拥有 length 属性并且 length 属性值为 Number 类型的元素
+  // 但是没用数组实例上的方法
   // 包括数组、arguments、HTML Collection 以及 NodeList 等等
   // 包括类似 {length: 10} 这样的对象
   // 包括字符串、函数等
@@ -1999,6 +2000,8 @@
   // 需要注意的是，value 值不能重复（不然后面的会覆盖前面的）
   // 且新构造的对象符合对象构造规则
   // 并且返回新构造的对象
+  // _.invert({Moe: "Moses", Larry: "Louis", Curly: "Jerome"});
+  // => {Moses: "Moe", Louis: "Larry", Jerome: "Curly"};
   _.invert = function(obj) {
     // 返回的新的对象
     var result = {};
@@ -2015,6 +2018,9 @@
   // 遍历该对象的键值对（包括 own properties 以及 原型链上的）
   // 如果某个 value 的类型是方法（function），则将该 key 存入数组
   // 将该数组排序后返回
+  // _.functions(_);
+  // => ["all", "any", "bind", "bindAll", "clone", "compact", "compose" ...
+
   _.functions = _.methods = function(obj) {
     // 返回的数组
     var names = [];
@@ -2198,6 +2204,9 @@
   // attrs 参数为一个对象
   // 判断 object 对象中是否有 attrs 中的所有 key-value 键值对
   // 返回布尔值
+  // var stooge = {name: 'moe', age: 32};
+  // _.isMatch(stooge, {age: 32});
+  // => true
   _.isMatch = function(object, attrs) {
     // 提取 attrs 对象的所有 keys
     var keys = _.keys(attrs), length = keys.length;
@@ -2550,7 +2559,7 @@
 
   // Is a given variable undefined?
   // 判断是否是 undefined
-  // undefined 能被改写 （IE < 9）
+  // undefined 在 es3 中不是关键字，能被改写 （IE < 9）
   // undefined 只是全局对象的一个属性
   // 在局部环境能被重新定义
   // 但是「void 0」始终是 undefined
