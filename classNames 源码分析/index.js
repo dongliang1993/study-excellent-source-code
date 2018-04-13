@@ -25,18 +25,15 @@
 
 (function () {
 	'use strict';
-
 	var hasOwn = {}.hasOwnProperty;
 
 	function classNames () {
 		var classes = [];
-
 		for (var i = 0; i < arguments.length; i++) {
 			var arg = arguments[i];
 			if (!arg) continue;
 
 			var argType = typeof arg;
-
 			if (argType === 'string' || argType === 'number') {
 				classes.push(arg);
 			} else if (Array.isArray(arg) && arg.length) {
@@ -54,7 +51,6 @@
 				}
 			}
 		}
-
 		return classes.join(' ');
 	}
 
