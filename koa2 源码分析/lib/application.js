@@ -32,10 +32,9 @@ const deprecate = require('depd')('koa');
 module.exports = class Application extends Emitter {
   /**
    * Initialize a new `Application`.
-   *
+   * 初始化一个新的 Application
    * @api public
    */
-
   constructor() {
     super();
 
