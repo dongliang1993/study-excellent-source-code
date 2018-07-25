@@ -31,7 +31,7 @@
 		var classes = [];
 		for (var i = 0; i < arguments.length; i++) {
 			var arg = arguments[i];
-			if (!arg) continue;
+			if (!arg) continue; // 排除了 falsy 值
 
 			var argType = typeof arg;
 			if (argType === 'string' || argType === 'number') {
@@ -66,3 +66,26 @@
 		window.classNames = classNames;
 	}
 }());
+
+function classNames(...args) {
+  let classes = []
+  args.forEach(arg => {
+    const argType = typeof arg
+    if (arg && (argType === 'string' || argType === 'number')) {
+      classes.push(arg)
+    } else if (Array.isArray(arg) && argType.length) {
+      const inner = classNames.apply(null, ...arg)
+      if (inner) {
+        classes.push(inner)
+      }
+    } else if (argType === 'object' && arg) { // 排除null
+      const keys = Object.keys(arg)
+      keys.forEach(key => {
+        if (arg.hasOwnProperty(key) && arg[key]) {
+          classes.push(key)
+        }
+      })
+    }
+  })
+  return classes.join(' ');
+}
