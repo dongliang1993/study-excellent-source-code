@@ -1,0 +1,18 @@
+language: node_js
+node_js:
+- 8
+os: linux
+dist: trusty
+sudo: required
+cache:
+  yarn: true
+branches:
+  only:
+  - master
+install:
+- |
+  yarn bootstrap
+script:
+- |
+  ./scripts/check-git-hooks.sh && yarn lint && yarn test
+

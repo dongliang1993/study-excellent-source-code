@@ -1,0 +1,21 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8-stretch-browsers
+    working_directory: ~/youzan/zent
+    steps:
+      - checkout
+      - run:
+          name: Pre-Dependencies
+          command: |
+            curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --import
+            curl -o- -L https://yarnpkg.com/install.sh | bash
+      - run:
+          name: Install Dependencies
+          command: |
+            yarn bootstrap
+      - run:
+          name: NPM Test
+          command: |
+            ./scripts/check-git-hooks.sh && yarn lint && yarn test
