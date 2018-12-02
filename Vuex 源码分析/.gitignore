@@ -1,0 +1,12 @@
+.DS_Store
+./vuex-3.0.1/node_modules
+./vuex-3.0.1/TODO.md
+./vuex-3.0.1/lib
+./vuex-3.0.1/docs/_book
+./vuex-3.0.1/examples/**/build.js
+./vuex-3.0.1/types/typings
+./vuex-3.0.1/types/test/*.js
+./vuex-3.0.1/explorations
+./vuex-3.0.1/*.log
+./vuex-3.0.1/test/e2e/reports
+./vuex-3.0.1/test/e2e/screenshots

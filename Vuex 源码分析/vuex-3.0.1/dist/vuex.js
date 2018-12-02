@@ -294,7 +294,6 @@ function makeAssertionMessage (path, key, type, value, expected) {
 var Vue; // bind on install
 
 var Store = function Store (options) {
-  debugger
   var this$1 = this;
   if ( options === void 0 ) options = {};
 
@@ -318,6 +317,7 @@ var Store = function Store (options) {
   if (typeof state === 'function') {
     state = state() || {};
   }
+
   // store internal state
   this._committing = false;
   this._actions = Object.create(null);
