@@ -8,9 +8,9 @@
 </head>
 <body>
   <script src="https://cdn.bootcss.com/vue/2.5.17-beta.0/vue.min.js"></script>
-  <!-- <script src='./vuex/src/index.js'></script> -->
+  <script src='./vuex-3.0.1/dist/vuex.js'></script>
   <script>
-    // Vue.use(Vuex)
+    Vue.use(Vuex)
     console.log(Vuex)
     const store = new Vuex.Store({
       state: {
@@ -22,9 +22,9 @@
         }
       }
     })
-    // console.log(store.state.count) // -> 0
-    // store.commit('increment')
-    // console.log(store.state.count) // -> 1
+    console.log(store.state.count) // -> 0
+    store.commit('increment')
+    console.log(store.state.count) // -> 1
   </script>
 </body>
 </html>
