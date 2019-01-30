@@ -249,7 +249,8 @@ vuex 文档中有相关描述：
     // Auto install if it is not done yet and `window` has `Vue`.
     // To allow users to avoid auto-installation in some cases,
     // this code should be placed here. See #731
-    // 如果 window.Vue 存在，自动安装
+    // 在浏览器环境下，如果插件还未安装（!Vue即判断是否未安装），则它会自动安装。
+    // 它允许用户在某些情况下避免自动安装。
     if (!Vue && typeof window !== 'undefined' && window.Vue) {
       install(window.Vue)
     }
@@ -257,7 +258,7 @@ vuex 文档中有相关描述：
     if (process.env.NODE_ENV !== 'production') {
       // 根据变量 Vue 的值判断是否已经安装过 vuex
       assert(Vue, `must call Vue.use(Vuex) before creating a store instance.`)
-      // 当前环境是否支持 Promise
+      // 如果 Promise === undefined (当前环境是否支持 Promise)
       assert(typeof Promise !== 'undefined', `vuex requires a Promise polyfill in this browser.`)
       // 是否是通过 new 操作符来创建 store 对象的
       assert(this instanceof Store, `Store must be called with the new operator.`)
@@ -323,6 +324,7 @@ vuex 文档中有相关描述：
     // init root module.
     // this also recursively registers all sub-modules
     // and collects all module getters inside this._wrappedGetters
+    // 安装 modules
     installModule(this, state, [], this._modules.root)
 
     // initialize the store vm, which is responsible for the reactivity
@@ -338,5 +340,338 @@ vuex 文档中有相关描述：
       devtoolPlugin(this)
     }
   }
+```
+
+
+
+## ModuleCollection.js
+
+![](./images/20181211-152004x.png)
+
+
+
+```js
+/**
+ * forEach for object
+ */
+function forEachValue (obj, fn) {
+  Object.keys(obj).forEach(function (key) { return fn(obj[key], key) })
+}
+```
+
+
+
+看开下 register 函数:
+
+```js
+rawModule = {
+   state: {
+     count: 0
+    },
+    mutations: {
+      increment (state) {
+        state.count++
+      }
+    },
+    modules: {
+      account: {
+        namespaced: true,
+        state: {
+        } 
+      }
+    }
+  }
+```
+
+
+
+```js
+  register (path, rawModule, runtime = true) {
+    if (process.env.NODE_ENV !== 'production') {
+      assertRawModule(path, rawModule)
+    }
+
+    // 创建 Module 实例
+    const newModule = new Module(rawModule, runtime)
+    // 如果是第一次运行，path 是个空数组，这时候注册为根组件
+    if (path.length === 0) {
+      this.root = newModule
+    } else {
+      // 如果是注册子 module 
+      // [].slice(0, -1) 表示去除最后一个元素的数组
+      // [1,2,3].slice(0, -1) -> [1,2]
+      // [1].slice(0, -1) -> []
+      // 获得当前这个子 module 的父级
+      const parent = this.get(path.slice(0, -1))
+      parent.addChild(path[path.length - 1], newModule)
+    }
+
+    // register nested modules
+    // 如果我们使用了 modules 进行子模块划分
+    // 那就递归创建子 module 对象
+    if (rawModule.modules) {
+      forEachValue(rawModule.modules, (rawChildModule, key) => {
+        // 每次注册子 module 都会临时在 path 上添加一个 key
+        // 但是这并不会改变 path 的值，只是为了临时使用
+        this.register(path.concat(key), rawChildModule, runtime)
+      })
+    }
+  }
+  get (path) {
+    return path.reduce((module, key) => {
+      return module.getChild(key)
+    }, this.root)
+  }
+```
+
+
+
+Module.js
+
+```js
+import { forEachValue } from '../util'
+
+export default class Module {
+  constructor (rawModule, runtime) {
+    // 暂时不知道这个 runtime 是有什么用
+    this.runtime = runtime
+    // 注意，_children 是一个**对象**
+    this._children = Object.create(null)
+    // 把 初始化传进来的参数 放到 Module 实例上  
+    this._rawModule = rawModule
+    // 把 state 放到 Module 实例上
+    const rawState = rawModule.state
+    this.state = (typeof rawState === 'function' ? rawState() : rawState) || {}
+  }
+
+  get namespaced () {
+    return !!this._rawModule.namespaced
+  }
+
+  addChild (key, module) {
+    // 在 _children 这个对象上挂载子 module
+    this._children[key] = module
+  }
+
+  removeChild (key) {
+    // 在 _children 这个对象上移除子 module
+    delete this._children[key]
+  }
+
+  getChild (key) {
+    // 在 _children 这个对象上获得子 module
+    return this._children[key]
+  }
+
+  update (rawModule) {
+    this._rawModule.namespaced = rawModule.namespaced
+    if (rawModule.actions) {
+      this._rawModule.actions = rawModule.actions
+    }
+    if (rawModule.mutations) {
+      this._rawModule.mutations = rawModule.mutations
+    }
+    if (rawModule.getters) {
+      this._rawModule.getters = rawModule.getters
+    }
+  }
+
+  forEachChild (fn) {
+    forEachValue(this._children, fn)
+  }
+
+  forEachGetter (fn) {
+    if (this._rawModule.getters) {
+      forEachValue(this._rawModule.getters, fn)
+    }
+  }
+
+  forEachAction (fn) {
+    if (this._rawModule.actions) {
+      forEachValue(this._rawModule.actions, fn)
+    }
+  }
+
+  forEachMutation (fn) {
+    if (this._rawModule.mutations) {
+      forEachValue(this._rawModule.mutations, fn)
+    }
+  }
+}
+```
+
+`ModuleCollection` 主要作用是将传入的 `options` 对象整个构造为一个 `module` 对象, 分为根 module 和children module，循环调用 `register` 为其中的 `modules` 属性进行模块注册, 使其都成为 `module` 对象, 最后 `options` 对象被构造成一个完整的组件树.
+
+```js
+dispatch (_type, _payload) {
+    // check object-style dispatch
+	// 获取 type 和 payload 参数
+	const {
+	  type,
+	  payload
+	} = unifyObjectStyle(_type, _payload)
+
+	const action = { type, payload }
+	// 根据 type 获取所有对应的处理过的 action 函数集合
+	const entry = this._actions[type]
+    // 如果没有对应 type 的 action，提示错误
+	if (!entry) {
+	  if (process.env.NODE_ENV !== 'production') {
+	    console.error(`[vuex] unknown action type: ${type}`)
+	  }
+	  return
+	}
+	
+	// 执行 action 函数
+	return entry.length > 1
+	  ? Promise.all(entry.map(handler => handler(payload)))
+	  : entry[0](payload)
+}
+```
+
+commit
+
+```js
+  commit (_type, _payload, _options) {
+    // check object-style commit
+    // 解析参数
+    const {
+      type,
+      payload,
+      options
+    } = unifyObjectStyle(_type, _payload, _options)
+
+    const mutation = { type, payload }
+    const entry = this._mutations[type]
+    if (!entry) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.error(`[vuex] unknown mutation type: ${type}`)
+      }
+      return
+    }
+    // 执行 mutation 函数
+    this._withCommit(() => {
+      entry.forEach(function commitIterator (handler) {
+        handler(payload)
+      })
+    })
+    // 执行所有的订阅者函数
+    this._subscribers.forEach(sub => sub(mutation, this.state))
+
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      options && options.silent
+    ) {
+      console.warn(
+        `[vuex] mutation type: ${type}. Silent option has been removed. ` +
+        'Use the filter functionality in the vue-devtools'
+      )
+    }
+  }
+  _withCommit (fn) {
+    const committing = this._committing
+    this._committing = true
+    fn()
+    this._committing = committing
+  }
+```
+
+
+
+## vm 组件设置
+
+```js
+// resetStoreVM(this, state)
+
+function resetStoreVM (store, state, hot) {
+  // 旧的 vm 实例
+  const oldVm = store._vm
+
+  // bind store public getters
+  // 定义 getters 属性
+  store.getters = {}
+  // 获取处理的 getters 函数集合
+  const wrappedGetters = store._wrappedGetters
+  const computed = {}
+  // 循环所有处理过的getters, 
+  // 并新建 computed 对象进行存储 getter 函数执行的结果, 
+  // 然后通过Object.defineProperty方法为 getters 对象建立属性
+  // 使得我们通过 this.$store.getters.xxxgetter 能够访问到 store._vm[xxxgetters]
+  forEachValue(wrappedGetters, (fn, key) => {
+    // use computed to leverage its lazy-caching mechanism
+    computed[key] = () => fn(store)
+    Object.defineProperty(store.getters, key, {
+      get: () => store._vm[key],
+      enumerable: true // for local getters
+    })
+  })
+
+  // use a Vue instance to store the state tree
+  // suppress warnings just in case the user has added
+  // some funky global mixins
+  const silent = Vue.config.silent
+  // 将全局的silent设置为 true, 取消这个 _vm 的所有日志和警告
+  Vue.config.silent = true
+    
+  // 设置新的 vm, 传入 state
+  // 把 computed 对象作为 _vm 的 computed 属性, 这样就完成了 getters 的注册
+  store._vm = new Vue({
+    data: {
+      $$state: state
+    },
+    computed
+  })
+  // 还原 silent 设置
+  Vue.config.silent = silent
+
+  // enable strict mode for new vm
+  if (store.strict) {
+	// 严格模式下, 在mutation之外的地方修改 state 会报错
+    enableStrictMode(store)
+  }
+
+  if (oldVm) {
+    if (hot) {
+      // dispatch changes in all subscribed watchers
+      // to force getter re-evaluation for hot reloading.
+      store._withCommit(() => {
+        oldVm._data.$$state = null
+      })
+    }
+    Vue.nextTick(() => oldVm.$destroy())
+  }
+}
+```
+
+
+
+## util.js 总览
+
+这一部分工具函数确实是没啥可说的，本身功能也比较简单，所以连带注释一起放在这里，直接就能看清楚
+
+```js
+/**
+ * forEach for object
+ */
+// 获取对象可迭代的属性，然后循环遍历
+export function forEachValue (obj, fn) {
+  Object.keys(obj).forEach(key => fn(obj[key], key))
+}
+// 判断是否是 Object
+export function isObject (obj) {
+  // typeof null  也是 'object',所以要排除 null 的影响
+  return obj !== null && typeof obj === 'object'
+}
+// 判断是否是 Promise
+// 其实就是判断是否有 then 函数(thenable)
+export function isPromise (val) {
+  return val && typeof val.then === 'function'
+}
+// 断言函数
+// 如果没有 condition ，就 throw 出来对一个 error
+// error 上回携带 msg ，这个 msg 是自己根据情况来传进去的
+export function assert (condition, msg) {
+  if (!condition) throw new Error(`[vuex] ${msg}`)
+}
 ```
 

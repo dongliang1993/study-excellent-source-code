@@ -11,14 +11,21 @@
   <script src='./vuex-3.0.1/dist/vuex.js'></script>
   <script>
     Vue.use(Vuex)
-    console.log(Vuex)
     const store = new Vuex.Store({
       state: {
         count: 0
       },
+      strict: true,
       mutations: {
         increment (state) {
           state.count++
+        }
+      },
+      modules: {
+        account: {
+          namespaced: true,
+          state: {
+          } 
         }
       }
     })

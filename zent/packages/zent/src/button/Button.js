@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import setClass from 'classnames';
 import PropTypes from 'prop-types';
+// https://lodash.com/docs/4.17.11#omit
 import omit from 'lodash/omit';
 import Icon from 'icon';
 
@@ -110,6 +111,7 @@ export default class Button extends PureComponent {
     const Node = component || 'button';
     const nodeProps = omit(this.props, BTN_BLACK_LIST);
 
+    // htmlType: button标签原生type属性
     return (
       <Node
         {...nodeProps}
@@ -139,6 +141,7 @@ export default class Button extends PureComponent {
       icon,
       children,
     } = this.props;
+    // 可选，如果有 href || target 设置的话会用a标签而不是button
     let renderer = href || target ? 'renderLink' : 'renderButton';
     let { className } = this.props;
     let classNames = setClass(
@@ -154,6 +157,7 @@ export default class Button extends PureComponent {
       `${prefix}-btn`,
       className
     );
+    // 是否需要图标
     const iconNode = icon ? <Icon type={icon} /> : null;
     const wrappedChildren = wrapTextWithSpanTag(
       children,

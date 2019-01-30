@@ -71,6 +71,7 @@ function instantiateReactComponent(node) {
   if (node === null || node === false) {
     instance = ReactEmptyComponent.create(instantiateReactComponent);
   } else if (typeof node === 'object') {
+    // Dom 标签 或者是自定义组件
     var element = node;
     invariant(
       element && (typeof element.type === 'function' ||

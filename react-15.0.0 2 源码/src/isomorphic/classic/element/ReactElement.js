@@ -116,6 +116,7 @@ var ReactElement = function(type, key, ref, self, source, owner, props) {
 // createElement 只是做了简单的参数修正，返回一个 ReactElement 实例对象，
 // 也就是虚拟元素的实例
 ReactElement.createElement = function(type, config, children) {
+  // 初始化参数
   var propName;
 
   // Reserved names are extracted
@@ -166,6 +167,7 @@ ReactElement.createElement = function(type, config, children) {
 
   // Resolve default props
   // 如果某个 prop 为空且存在默认的 prop，则将默认 prop 赋给当前的 prop
+  // type是函数或者 class 都可以取出 defaultProps ，牛逼
   if (type && type.defaultProps) {
     var defaultProps = type.defaultProps;
     for (propName in defaultProps) {

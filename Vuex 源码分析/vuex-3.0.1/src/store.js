@@ -10,13 +10,18 @@ export class Store {
     // Auto install if it is not done yet and `window` has `Vue`.
     // To allow users to avoid auto-installation in some cases,
     // this code should be placed here. See #731
+    // 在浏览器环境下，如果插件还未安装（!Vue即判断是否未安装），则它会自动安装。
+    // 它允许用户在某些情况下避免自动安装。
     if (!Vue && typeof window !== 'undefined' && window.Vue) {
       install(window.Vue)
     }
 
     if (process.env.NODE_ENV !== 'production') {
+      // 如果没有 Vue 这个对象
       assert(Vue, `must call Vue.use(Vuex) before creating a store instance.`)
+      // 如果 Promise === undefined (不支持 Promise )
       assert(typeof Promise !== 'undefined', `vuex requires a Promise polyfill in this browser.`)
+      // 如果不是用 new 操作符调用的
       assert(this instanceof Store, `Store must be called with the new operator.`)
     }
 
